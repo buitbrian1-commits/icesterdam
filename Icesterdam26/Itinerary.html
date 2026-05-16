@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="en" data-theme="iceland">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Iceland → Amsterdam · May 2026</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..600;1,9..144,400..500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            display: ['var(--font-display)', 'serif'],
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    :root {
+      /* Shared */
+      --radius-pill: 9999px;
+      --radius-card: 24px;
+      --hairline: 1px;
+      --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
+
+      /* Iceland (default) — basalt / moss / glacial */
+      --bg: 170 22% 6%;
+      --bg-elev: 170 18% 10%;
+      --fg: 60 25% 94%;
+      --muted-fg: 160 10% 65%;
+      --accent: 165 55% 55%;      /* moss-glacier */
+      --accent-2: 35 75% 62%;     /* aurora/lichen warm */
+      --border: 170 15% 22%;
+      --hairline-color: 60 25% 94% / 0.12;
+
+      --font-display: 'Instrument Serif', 'Times New Roman', serif;
+    }
+
+    [data-theme="amsterdam"] {
+      --bg: 36 38% 95%;
+      --bg-elev: 30 28% 90%;
+      --fg: 20 25% 14%;
+      --muted-fg: 25 15% 38%;
+      --accent: 145 32% 30%;
+      --accent-2: 18 65% 52%;
+      --border: 30 20% 80%;
+      --hairline-color: 20 25% 14% / 0.12;
+
+      --font-display: 'Fraunces', Georgia, serif;
+    }
+
+    html, body { background: hsl(var(--bg)); color: hsl(var(--fg)); }
+    html { transition: background-color 600ms var(--ease-soft); }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      font-feature-settings: 'ss01', 'cv11';
+      transition: background-color 600ms var(--ease-soft), color 600ms var(--ease-soft);
+      -webkit-font-smoothing: antialiased;
+    }
+    .font-display {
+      font-family: var(--font-display);
+    }
+    [data-theme="amsterdam"] .font-display {
+      font-variation-settings: 'SOFT' 100, 'WONK' 1, 'opsz' 80;
+      font-weight: 400;
+    }
+    em { font-style: italic; }
+
+    /* Liquid glass */
+    .liquid-glass {
+      background: hsl(var(--fg) / 0.04);
+      backdrop-filter: blur(14px) saturate(140%);
+      -webkit-backdrop-filter: blur(14px) saturate(140%);
+      border: 1px solid hsl(var(--fg) / 0.12);
+      box-shadow:
+        inset 0 1px 1px hsl(var(--fg) / 0.10),
+        0 10px 40px -10px hsl(var(--bg) / 0.5);
+      position: relative;
+    }
+    [data-theme="amsterdam"] .liquid-glass {
+      background: hsl(var(--fg) / 0.025);
+      border-color: hsl(var(--fg) / 0.10);
+    }
+    .liquid-glass::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      padding: 1.2px;
+      background: linear-gradient(180deg,
+        hsl(var(--fg) / 0.35) 0%,
+        hsl(var(--fg) / 0.08) 30%,
+        hsl(var(--fg) / 0) 60%,
+        hsl(var(--fg) / 0.22) 100%);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+              mask-composite: exclude;
+      pointer-events: none;
+    }
+
+    /* Drifting blobs */
+    .blob {
+      position: absolute;
+      width: 55vmax; height: 55vmax;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.45;
+      mix-blend-mode: screen;
+      will-change: transform;
+    }
+    [data-theme="amsterdam"] .blob {
+      opacity: 0.40;
+      mix-blend-mode: multiply;
+      filter: blur(100px);
+    }
+    .blob-a { top: -20%; left: -10%; animation: drift-a 22s ease-in-out infinite alternate; }
+    .blob-b { top: 10%; right: -20%; animation: drift-b 26s ease-in-out infinite alternate; }
+    .blob-c { bottom: -20%; left: 20%; animation: drift-c 30s ease-in-out infinite alternate; }
+    @keyframes drift-a { from { transform: translate(0,0) scale(1); } to { transform: translate(8vw, 6vh) scale(1.1); } }
+    @keyframes drift-b { from { transform: translate(0,0) scale(1); } to { transform: translate(-10vw, 8vh) scale(0.95); } }
+    @keyframes drift-c { from { transform: translate(0,0) scale(1); } to { transform: translate(6vw, -10vh) scale(1.05); } }
+
+    /* Reveal animations */
+    .reveal { animation: revealUp 0.85s var(--ease-soft) both; }
+    .reveal-d1 { animation-delay: 0.08s; }
+    .reveal-d2 { animation-delay: 0.18s; }
+    .reveal-d3 { animation-delay: 0.28s; }
+    @keyframes revealUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+    .reveal-in { opacity: 1; transform: translateY(0); transition: opacity .8s var(--ease-soft), transform .8s var(--ease-soft); }
+    .reveal-out { opacity: 0; transform: translateY(20px); }
+
+    .bob { animation: bob 2.6s ease-in-out infinite; }
+    @keyframes bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(6px); } }
+
+    .pulse-ring::after {
+      content:''; position:absolute; inset:-6px; border-radius:9999px;
+      border: 1.5px solid hsl(var(--accent) / 0.55);
+      animation: pulseRing 1.8s ease-out infinite;
+    }
+    @keyframes pulseRing { 0% { transform: scale(0.85); opacity: 0.8; } 100% { transform: scale(1.6); opacity: 0; } }
+
+    .wiggle-once { animation: wiggle 0.65s ease-in-out 1; }
+    @keyframes wiggle {
+      0%,100% { transform: rotate(0); }
+      20% { transform: rotate(-1.6deg); }
+      40% { transform: rotate(1.4deg); }
+      60% { transform: rotate(-0.8deg); }
+      80% { transform: rotate(0.6deg); }
+    }
+
+    .dot-pulse { animation: dotPulse 1.4s ease-out 1; }
+    @keyframes dotPulse {
+      0% { box-shadow: 0 0 0 0 hsl(var(--accent) / 0.6), 0 0 0 3px hsl(var(--bg)); }
+      100% { box-shadow: 0 0 0 8px hsl(var(--accent) / 0), 0 0 0 3px hsl(var(--bg)); }
+    }
+
+    .day-card { transition: transform .35s var(--ease-soft), box-shadow .35s var(--ease-soft); }
+    .day-card:hover {
+      transform: translateY(-4px);
+      box-shadow: inset 0 1px 1px hsl(var(--fg) / 0.10), 0 20px 60px -20px hsl(var(--accent) / 0.45);
+    }
+
+    .thumb { transition: transform .3s var(--ease-soft); }
+    .thumb:hover { transform: translateY(-6px) rotate(1deg) scale(1.02); }
+
+    .easter:hover { animation: wiggle 0.5s ease-in-out 1; }
+
+    /* CBCG mark interactions */
+    .cbcg-mark:hover .cbcg-letter:nth-child(1) { transform: rotate(-14deg) translateY(-2px) !important; }
+    .cbcg-mark:hover .cbcg-letter:nth-child(2) { transform: rotate(12deg) translateY(2px) !important; }
+    .cbcg-mark:hover .cbcg-letter:nth-child(3) { transform: rotate(-10deg) translateY(-1px) !important; }
+    .cbcg-mark:hover .cbcg-letter:nth-child(4) { transform: rotate(14deg) translateY(1px) !important; }
+
+    /* Ken Burns slow pan/zoom for hero photo */
+    .kenburns {
+      animation: kenburns 30s ease-in-out infinite alternate;
+      transform-origin: center center;
+      will-change: transform;
+    }
+    @keyframes kenburns {
+      0%   { transform: scale(1.08) translate(-1%, -1%); }
+      100% { transform: scale(1.18) translate(1.5%, 1.5%); }
+    }
+
+    /* Hero overlay swap: desktop side-gradient, mobile bottom-gradient */
+    .hero-overlay-mobile { display: none; }
+    @media (max-width: 768px) {
+      .hero-overlay-desktop { display: none; }
+      .hero-overlay-mobile  { display: block; }
+      .hero-section { align-items: flex-end !important; }
+      .hero-content { padding-bottom: 6rem; }
+    }
+
+    /* Stats row dividers — hairline on left edge, hidden when wrapping or on mobile */
+    .hero-stat-div { border-left: 1px solid rgba(255,255,255,0.15); }
+    @media (max-width: 480px) {
+      .hero-stat-div { border-left: 0; padding-left: 0; margin-left: 0; }
+    }
+
+    /* Reduced-motion: hide video, freeze Ken Burns */
+    @media (prefers-reduced-motion: reduce) {
+      .kenburns { animation: none; }
+      video { display: none; }
+    }
+
+    /* ========================================================================
+       Aurora backdrop for the day-by-day section. Two stacked repeating
+       gradient layers drift in opposite directions, heavily blurred — reads as
+       slow-moving aurora ribbons. Theme-aware: Iceland uses moss + glacial
+       greens screened over dark; Amsterdam uses peach + amber multiplied over
+       cream for a golden-hour cast.
+    ======================================================================== */
+    .aurora-wrap {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .aurora-wrap::before,
+    .aurora-wrap::after {
+      content: '';
+      position: absolute;
+      inset: -25%;
+      background-repeat: no-repeat;
+      will-change: transform, background-position;
+    }
+
+    /* Iceland — northern-lights radial gradients over dark. Inspired by the
+       referenced snippet's ellipse-radial approach, but with an aurora palette:
+       moss/glacial green up top, violet wash at the bottom, cyan + deep-green
+       side bloom. Slow transform drift keeps the bands feeling alive. */
+    [data-theme="iceland"] .aurora-wrap::before {
+      background:
+        radial-gradient(ellipse 95% 65% at 50% -8%, hsl(165 80% 52% / 0.55), transparent 70%),
+        radial-gradient(ellipse 80% 50% at 50% 108%, hsl(272 60% 55% / 0.40), transparent 70%),
+        radial-gradient(ellipse 60% 45% at 8% 35%, hsl(190 85% 58% / 0.35), transparent 75%),
+        radial-gradient(ellipse 55% 40% at 92% 60%, hsl(150 70% 50% / 0.30), transparent 75%);
+      filter: blur(40px);
+      opacity: 0.9;
+      mix-blend-mode: screen;
+      animation: aurora-drift-a 38s ease-in-out infinite alternate;
+    }
+    [data-theme="iceland"] .aurora-wrap::after {
+      background:
+        radial-gradient(ellipse 70% 50% at 30% 85%, hsl(200 85% 58% / 0.30), transparent 75%),
+        radial-gradient(ellipse 55% 38% at 75% 18%, hsl(140 65% 48% / 0.32), transparent 75%),
+        radial-gradient(ellipse 45% 30% at 50% 50%, hsl(180 70% 55% / 0.18), transparent 80%);
+      filter: blur(70px);
+      opacity: 0.75;
+      mix-blend-mode: screen;
+      animation: aurora-drift-b 55s ease-in-out infinite alternate;
+    }
+
+    /* Amsterdam — golden hour: peach, amber, terracotta, multiplied over cream */
+    [data-theme="amsterdam"] .aurora-wrap::before {
+      background-image:
+        repeating-linear-gradient(
+          112deg,
+          hsl(28 80% 62% / 0.55) 0%,
+          hsl(40 88% 68% / 0.45) 14%,
+          transparent 26%,
+          hsl(18 78% 60% / 0.50) 38%,
+          hsl(48 90% 72% / 0.55) 50%,
+          transparent 64%,
+          hsl(12 72% 56% / 0.45) 78%,
+          hsl(42 85% 66% / 0.50) 90%,
+          transparent 100%
+        );
+      background-size: 220% 220%;
+      filter: blur(75px);
+      opacity: 0.65;
+      mix-blend-mode: multiply;
+      animation: aurora-drift-a 32s ease-in-out infinite alternate;
+    }
+    [data-theme="amsterdam"] .aurora-wrap::after {
+      background-image:
+        repeating-linear-gradient(
+          75deg,
+          hsl(36 82% 70% / 0.50) 0%,
+          transparent 20%,
+          hsl(22 72% 56% / 0.50) 40%,
+          transparent 60%,
+          hsl(46 80% 68% / 0.55) 80%,
+          transparent 100%
+        );
+      background-size: 270% 270%;
+      filter: blur(100px);
+      opacity: 0.55;
+      mix-blend-mode: multiply;
+      animation: aurora-drift-b 48s ease-in-out infinite alternate;
+    }
+
+    @keyframes aurora-drift-a {
+      0%   { background-position: 0% 50%;   transform: translate3d(0,0,0) rotate(0deg); }
+      100% { background-position: 100% 50%; transform: translate3d(-3%, 2%, 0) rotate(1.5deg); }
+    }
+    @keyframes aurora-drift-b {
+      0%   { background-position: 100% 50%; transform: translate3d(0,0,0) rotate(0deg); }
+      100% { background-position: 0% 50%;   transform: translate3d(3%, -2%, 0) rotate(-1deg); }
+    }
+
+    /* Top + bottom soft fade so aurora blends into adjacent sections */
+    .aurora-wrap > .aurora-mask {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(180deg,
+          hsl(var(--bg)) 0%,
+          hsl(var(--bg) / 0) 12%,
+          hsl(var(--bg) / 0) 88%,
+          hsl(var(--bg)) 100%);
+      pointer-events: none;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .aurora-wrap::before,
+      .aurora-wrap::after { animation: none; }
+      .day-card-scroll > article { transform: none !important; }
+    }
+
+    /* Clickable caption pills on day-card images */
+    .caption-link {
+      transition: filter 200ms ease, transform 200ms ease;
+      cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48"><text x="24" y="38" font-size="40" text-anchor="middle">%F0%9F%93%8D</text></svg>') 24 24, pointer;
+    }
+    .caption-link:hover {
+      filter: brightness(1.15);
+      transform: scale(1.03);
+    }
+
+    /* Page-specific emoji cursor. Rendered via inline SVG data URLs because
+       browsers don't accept raw emoji characters in cursor:url(). Hotspot is
+       centered on the 48px canvas. */
+    html[data-theme="iceland"] {
+      cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48"><text x="24" y="38" font-size="40" text-anchor="middle">%F0%9F%A5%BE</text></svg>') 24 24, auto;
+    }
+    html[data-theme="amsterdam"] {
+      cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48"><text x="24" y="38" font-size="40" text-anchor="middle">%F0%9F%9A%B4</text></svg>') 24 24, auto;
+    }
+
+    /* Touch devices skip custom cursors automatically; this is desktop-only by nature. */
+
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { scrollbar-width: none; }
+
+    /* Selection */
+    ::selection { background: hsl(var(--accent) / 0.35); }
+
+    /* Subtle base typographic */
+    h1, h2, h3 { text-wrap: balance; }
+    p { text-wrap: pretty; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+  <script src="content.js"></script>
+  <script type="text/babel" src="utils.jsx"></script>
+  <script type="text/babel" src="components.jsx"></script>
+  <script type="text/babel" src="app.jsx"></script>
+</body>
+</html>
