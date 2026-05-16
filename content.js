@@ -63,7 +63,7 @@ window.TRIP = {
         switch: null,
         title: 'Land, soak, and stumble through Reykjavík',
         images: [
-          src('https://images.squarespace-cdn.com/content/v1/64a439dde5405e2ca5d9a1b1/d9051ed4-1f18-4184-bd31-5260f1295fea/blue-lagoon-the-private-traveller.jpg', 'Blue Lagoon', 'coast', gmap('Blue Lagoon Iceland')),
+          src('./blue-lagoon.webp', 'Blue Lagoon', 'coast', gmap('Blue Lagoon Iceland')),
           pick('hills', 'Hallgrímskirkja', gmap('Hallgrimskirkja Reykjavik')),
           pick('generic', 'Harpa Concert Hall', gmap('Harpa Concert Hall')),
         ],
