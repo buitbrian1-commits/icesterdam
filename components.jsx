@@ -511,7 +511,7 @@ function DayCard({ day, dest }) {
           transform: `rotateX(${rotateX}deg) scale(${scale}) translateY(${translateY}px)`,
           transformOrigin: 'center top',
           transition: 'opacity 0.6s ease-out',
-          willChange: 'transform',
+          willChange: p > 0 && p < 1 ? 'transform' : 'auto',
         }}>
       
       {/* Top row */}
@@ -555,7 +555,7 @@ function DayCard({ day, dest }) {
       </button>
 
       {/* Timeline */}
-      <div className={`grid transition-all duration-500 ${open ? 'grid-rows-[1fr] opacity-100 mt-6 md:mt-8' : 'grid-rows-[0fr] opacity-0 md:grid-rows-[1fr] md:opacity-100 md:mt-8'}`}>
+      <div className={`grid transition-[grid-template-rows,opacity,margin-top] duration-500 ${open ? 'grid-rows-[1fr] opacity-100 mt-6 md:mt-8' : 'grid-rows-[0fr] opacity-0 md:grid-rows-[1fr] md:opacity-100 md:mt-8'}`}>
         <div className="overflow-hidden">
           <Timeline events={day.timeline} />
 
@@ -604,7 +604,7 @@ function ImgThumb({ im }) {
   return (
     <figure className="relative shrink-0 w-[78%] md:w-auto md:aspect-[4/5] aspect-[4/5] rounded-2xl overflow-hidden snap-start group thumb" style={{ background: 'hsl(var(--fg) / 0.05)' }}>
       {!errored &&
-      <img src={im.src} alt={im.caption} loading="lazy" onError={onErr} onLoad={onLoad}
+      <img src={im.src} alt={im.caption} loading="lazy" decoding="async" width="640" height="800" onError={onErr} onLoad={onLoad}
       className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.05]" />
       }
       {errored &&
@@ -650,7 +650,7 @@ function TimelineRow({ time, title, note }) {
   return (
     <li ref={ref} className="relative pb-5 last:pb-0">
       <span
-        className={`absolute -left-[15px] md:-left-[19px] top-2 w-2 h-2 rounded-full transition-all duration-500 ${seen ? 'dot-pulse' : ''}`}
+        className={`absolute -left-[15px] md:-left-[19px] top-2 w-2 h-2 rounded-full ${seen ? 'dot-pulse' : ''}`}
         style={{ background: 'hsl(var(--accent))', boxShadow: '0 0 0 3px hsl(var(--bg))' }} />
       
       <div className="flex items-baseline gap-3 flex-wrap">

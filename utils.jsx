@@ -59,9 +59,11 @@ const useReveal = () => {
 
 // Scroll-linked progress for an element. Returns 0 as the element enters from
 // below and 1 once it has crossed the upper trigger. Drives perspective tilt
-// and scale on day cards.
+// and scale on day cards. Bails before setState when the value hasn't moved
+// meaningfully — keeps off-screen cards from re-rendering on every scroll frame.
 const useScrollLinked = () => {
   const ref = useRef(null);
+  const last = useRef(0);
   const [p, setP] = useState(0);
   useEffect(() => {
     let raf = 0;
@@ -70,11 +72,14 @@ const useScrollLinked = () => {
       if (!el) return;
       const r = el.getBoundingClientRect();
       const vh = window.innerHeight;
-      // 0 when card's top is at viewport bottom, 1 when card's top is ~25% from top.
       const enter = vh;
       const settle = vh * 0.25;
       const raw = (enter - r.top) / (enter - settle);
-      setP(Math.max(0, Math.min(1, raw)));
+      const v = raw < 0 ? 0 : raw > 1 ? 1 : raw;
+      if (Math.abs(v - last.current) > 0.005) {
+        last.current = v;
+        setP(v);
+      }
     };
     const onScroll = () => {
       cancelAnimationFrame(raf);

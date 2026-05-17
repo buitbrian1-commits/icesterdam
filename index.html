@@ -168,6 +168,17 @@
       box-shadow: inset 0 1px 1px hsl(var(--fg) / 0.10), 0 20px 60px -20px hsl(var(--accent) / 0.45);
     }
 
+    /* Containment lets off-screen day cards skip rendering work entirely.
+       content-visibility: auto + contain-intrinsic-size reserves space for
+       the skipped card so the scrollbar stays correct. Paint containment is
+       intentionally NOT applied here so the card's drop/hover box-shadow
+       isn't clipped at the wrapper edge. */
+    .day-card-scroll {
+      content-visibility: auto;
+      contain-intrinsic-size: 0 700px;
+      contain: layout style;
+    }
+
     .thumb { transition: transform .3s var(--ease-soft); }
     .thumb:hover { transform: translateY(-6px) rotate(1deg) scale(1.02); }
 
