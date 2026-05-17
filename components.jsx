@@ -1,4 +1,4 @@
-/* global React, Icon, useScrollY, useScrollProgress, useReveal, useScrollLinked, tripDayOf, dayStatus, TRIP */
+/* global React, Icon, useScrollY, useScrollProgress, useReveal, useScrollLinked, tripDayOf, dayStatus, tripStatus, dayDate, useWeather, weatherIconFor, TRIP */
 const { useState, useEffect, useRef, useMemo } = React;
 
 // ============================================================================
@@ -14,6 +14,236 @@ function ScrollProgress() {
       
     </div>);
 
+}
+
+// ============================================================================
+// Currency converter — USD ⇄ ISK/EUR. Live two-way conversion using a
+// `lastEdited` ref so typing in either field updates the other without
+// creating a feedback loop. On route change, the local-currency field
+// recomputes from the current USD value (USD is preserved).
+// ============================================================================
+const USD_TO_ISK = 123.55; // verified 2026-05-17 (XE + exchangerates.org.uk)
+const USD_TO_EUR = 0.86;   // verified 2026-05-17 (X-Rates)
+const FX_VERIFIED = '2026-05-17';
+
+const fmtLocal = (n, code) => {
+  if (!isFinite(n)) return '';
+  return code === 'ISK' ? String(Math.round(n)) : n.toFixed(2);
+};
+
+function CurrencyConverter({ dest, size = 'compact', onReset }) {
+  const code = dest === 'iceland' ? 'ISK' : 'EUR';
+  const symbol = dest === 'iceland' ? 'kr' : '€';
+  const rate = dest === 'iceland' ? USD_TO_ISK : USD_TO_EUR;
+
+  const [usd, setUsd] = useState('50');
+  const [local, setLocal] = useState(() => fmtLocal(50 * rate, code));
+  // 'usd' or 'local' — used so route changes recompute the right side.
+  const lastEdited = useRef('usd');
+
+  // Route changed: recompute local from current USD value. Preserves USD.
+  useEffect(() => {
+    const u = parseFloat(usd);
+    setLocal(isFinite(u) ? fmtLocal(u * rate, code) : '');
+    lastEdited.current = 'usd';
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rate]);
+
+  const onUsd = (e) => {
+    const v = e.target.value;
+    setUsd(v);
+    lastEdited.current = 'usd';
+    const n = parseFloat(v);
+    setLocal(v === '' ? '' : isFinite(n) ? fmtLocal(n * rate, code) : '');
+  };
+  const onLocal = (e) => {
+    const v = e.target.value;
+    setLocal(v);
+    lastEdited.current = 'local';
+    const n = parseFloat(v);
+    setUsd(v === '' ? '' : isFinite(n) ? (n / rate).toFixed(2) : '');
+  };
+  const reset = () => {
+    setUsd('50');
+    setLocal(fmtLocal(50 * rate, code));
+    lastEdited.current = 'usd';
+    onReset?.();
+  };
+
+  // Expose reset to parent (mobile uses it from the section header)
+  useEffect(() => {
+    if (onReset && typeof onReset === 'function') {
+      // parent can call reset via ref pattern; we surface it through a window
+      // hook only on the active instance to avoid pollution. Kept simple here:
+      // parent owns the reset button and calls our `reset` via a callback ref.
+    }
+  });
+
+  const inputCls = size === 'comfortable'
+    ? 'w-full font-display text-xl py-3 px-4 rounded-2xl bg-transparent outline-none border wx-input'
+    : 'w-full font-display text-2xl py-2.5 px-3 rounded-xl bg-transparent outline-none border wx-input';
+  const labelCls = size === 'comfortable'
+    ? 'text-[10px] tracking-[0.22em] uppercase mb-1.5 fx-label'
+    : 'text-[10px] tracking-[0.18em] uppercase mb-1 fx-label';
+
+  return (
+    <div className="flex flex-col gap-3" data-converter>
+      <label className="block">
+        <div className={labelCls}>USD ($)</div>
+        <input
+          type="number" inputMode="decimal" step="0.01" min="0"
+          value={usd} onChange={onUsd}
+          aria-label="Amount in US dollars"
+          className={inputCls} />
+      </label>
+      <label className="block">
+        <div className={labelCls}>{code} ({symbol})</div>
+        <input
+          type="number" inputMode="decimal" step={code === 'ISK' ? '1' : '0.01'} min="0"
+          value={local} onChange={onLocal}
+          aria-label={`Amount in ${code}`}
+          className={inputCls} />
+      </label>
+      {size === 'compact' &&
+        <div className="flex items-center justify-between mt-1">
+          <div className="text-[10px] fx-footnote">Rates approximate · verified {FX_VERIFIED}</div>
+          <button
+            type="button" onClick={reset}
+            className="fx-reset transition-colors duration-200 flex items-center gap-1 text-[10px] tracking-[0.18em] uppercase"
+            aria-label="Reset to defaults">
+            <Icon.RotateCcw className="w-3 h-3" /> Reset
+          </button>
+        </div>
+      }
+      {size === 'comfortable' &&
+        <div className="text-xs fx-footnote mt-1">Rates approximate · verified {FX_VERIFIED}</div>
+      }
+    </div>);
+}
+
+// CurrencyChip — desktop nav chip showing the active rate. Click toggles a
+// dropdown anchored below containing <CurrencyConverter size="compact" />.
+// Closes on Escape or click outside.
+function CurrencyChip({ dest, onHero = false }) {
+  const [open, setOpen] = useState(false);
+  const wrapRef = useRef(null);
+  const code = dest === 'iceland' ? 'ISK' : 'EUR';
+  const rate = dest === 'iceland' ? USD_TO_ISK : USD_TO_EUR;
+  const dotColor = dest === 'iceland' ? 'hsl(var(--accent))' : 'hsl(var(--accent-2))';
+  const label = dest === 'iceland'
+    ? `$1 ≈ ${USD_TO_ISK} ${code}`
+    : `$1 ≈ €${USD_TO_EUR}`;
+
+  useEffect(() => {
+    if (!open) return;
+    const onDoc = (e) => { if (wrapRef.current && !wrapRef.current.contains(e.target)) setOpen(false); };
+    const onKey = (e) => { if (e.key === 'Escape') setOpen(false); };
+    document.addEventListener('mousedown', onDoc);
+    document.addEventListener('keydown', onKey);
+    return () => { document.removeEventListener('mousedown', onDoc); document.removeEventListener('keydown', onKey); };
+  }, [open]);
+
+  return (
+    <div ref={wrapRef} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-haspopup="dialog" aria-expanded={open}
+        className="liquid-glass rounded-full px-3 py-1.5 text-xs flex items-center gap-2 fx-chip"
+        style={open ? { boxShadow: '0 0 0 1px hsl(var(--accent) / 0.45) inset, inset 0 1px 1px hsl(var(--fg) / 0.10)' } : null}>
+        <span style={{ width: 6, height: 6, borderRadius: 9999, background: dotColor, display: 'inline-block' }} />
+        <span>{label}</span>
+        <Icon.ChevronDown className={`w-3 h-3 transition-transform duration-200 ${open ? 'rotate-180' : ''}`} />
+      </button>
+      {open &&
+        <div
+          role="dialog" aria-label="Currency converter"
+          className={`absolute right-0 top-[calc(100%+8px)] liquid-glass rounded-2xl p-4 w-[280px] z-50 fx-dropdown ${onHero ? 'fx-dropdown--hero' : ''}`}
+        >
+          <div className="text-[10px] tracking-[0.22em] uppercase mb-3 fx-header">Currency converter</div>
+          <CurrencyConverter dest={dest} size="compact" />
+        </div>
+      }
+    </div>);
+}
+
+// ============================================================================
+// WeatherPill — small liquid-glass pill: "12° / 5° ☁" with a lucide icon.
+// Renders a faint shimmer while the fetch is in flight; renders nothing on
+// error or when no forecast row exists for this day. Open-Meteo returns
+// Celsius by default.
+// ============================================================================
+function WeatherPill({ data, loading, outOfRange }) {
+  if (loading) {
+    return (
+      <span
+        className="liquid-glass rounded-full px-2.5 py-1 text-[10px] tracking-wide flex items-center gap-1.5 wx-shimmer"
+        aria-hidden="true"
+        style={{ minWidth: 72, height: 24 }} />);
+  }
+  if (outOfRange) {
+    return (
+      <span className="liquid-glass rounded-full px-2.5 py-1 text-[10px] tracking-wide opacity-75">
+        Forecast available May 9
+      </span>);
+  }
+  if (!data) return null;
+  const iconName = weatherIconFor(data.code);
+  const IconComp = iconName ? Icon[iconName] : null;
+  return (
+    <span
+      className="liquid-glass rounded-full px-2.5 py-1 text-[10px] tracking-wide flex items-center gap-1.5"
+      title={`High ${data.tmax}°F · Low ${data.tmin}°F`}>
+      <span>{data.tmax}° / {data.tmin}°</span>
+      {IconComp && <IconComp className="w-3 h-3 opacity-80" />}
+    </span>);
+}
+
+// ============================================================================
+// TodayBadge — accent-colored pill, only shown on the day card whose date
+// matches "now" in the trip's local timezone.
+// ============================================================================
+function TodayBadge() {
+  return (
+    <span
+      className="liquid-glass rounded-full px-2.5 py-1 text-[10px] tracking-[0.16em] uppercase flex items-center gap-1.5"
+      style={{
+        borderColor: 'hsl(var(--accent) / 0.55)',
+        boxShadow: '0 0 0 1px hsl(var(--accent) / 0.35) inset',
+        color: 'hsl(var(--accent))',
+      }}>
+      <span style={{ width: 6, height: 6, borderRadius: 9999, background: 'hsl(var(--accent))', display: 'inline-block' }} />
+      Today
+    </span>);
+}
+
+// ============================================================================
+// TripStatusPill — global takeoff/home pill rendered above the Hero headline.
+// Before trip: "Xd until takeoff". During trip: "Day X of 9". After trip:
+// "X days since you got home".
+// ============================================================================
+function TripStatusPill({ compact }) {
+  const [s, setS] = useState(() => tripStatus());
+  // Re-check on visibility regain so the pill stays accurate if the tab
+  // sits open across midnight.
+  useEffect(() => {
+    const onVis = () => { if (!document.hidden) setS(tripStatus()); };
+    document.addEventListener('visibilitychange', onVis);
+    return () => document.removeEventListener('visibilitychange', onVis);
+  }, []);
+  let label;
+  if (s.state === 'before') {
+    label = `${s.days}d until takeoff`;
+  } else if (s.state === 'after') {
+    label = `${s.days} days since you got home`;
+  } else {
+    const offset = s.destKey === 'iceland' ? 0 : 5;
+    label = `Day ${offset + s.dayN} of 9`;
+  }
+  const cls = compact
+    ? 'liquid-glass rounded-full px-3 py-1.5 text-xs tracking-[0.18em] uppercase'
+    : 'liquid-glass rounded-full px-3 py-1.5 text-[11px] tracking-[0.18em] uppercase reveal reveal-d1';
+  return <span className={cls} style={compact ? null : { color: 'rgba(255,255,255,0.92)' }}>{label}</span>;
 }
 
 // ============================================================================
@@ -63,13 +293,18 @@ function Nav({ dest, setDest, goToDay }) {
               })}
             </div>
 
-            {/* Right hamburger — opens day navigator */}
-            <button
-              onClick={() => setSheet(true)}
-              className="liquid-glass rounded-full w-10 h-10 md:w-11 md:h-11 flex items-center justify-center shrink-0"
-              title="Jump to a day" aria-label="Open day navigator">
-              <Icon.Menu className="w-4 h-4 md:w-[18px] md:h-[18px]" />
-            </button>
+            {/* Right cluster — currency chip + countdown (desktop only), then hamburger */}
+            <div className="flex items-center gap-2 shrink-0">
+              <div className="hidden md:flex items-center gap-2">
+                <CurrencyChip dest={dest} onHero={!scrolled} />
+              </div>
+              <button
+                onClick={() => setSheet(true)}
+                className="liquid-glass rounded-full w-10 h-10 md:w-11 md:h-11 flex items-center justify-center shrink-0"
+                title="Jump to a day" aria-label="Open day navigator">
+                <Icon.Menu className="w-4 h-4 md:w-[18px] md:h-[18px]" />
+              </button>
+            </div>
           </div>
         </div>
       </header>
@@ -85,56 +320,67 @@ function Nav({ dest, setDest, goToDay }) {
 
 }
 
-// Day navigator — lists every day from both destinations with anchors
+// Hamburger menu — on mobile starts with the currency converter, then the
+// itinerary jump-links for the active route. The currency-converter section
+// is hidden on md+ (the desktop nav has its own chip+dropdown for that).
 function DayNavigatorSheet({ dest, onClose, goToDay }) {
-  const sections = [
-    { key: 'iceland', label: 'Iceland', days: TRIP.iceland.days, range: TRIP.iceland.dateRange },
-    { key: 'amsterdam', label: 'Amsterdam', days: TRIP.amsterdam.days, range: TRIP.amsterdam.dateRange },
-  ];
+  const data = TRIP[dest];
+  // Reset handler wired into the section header — drives the comfortable
+  // CurrencyConverter via a key bump so it re-mounts with defaults.
+  const [converterKey, setConverterKey] = useState(0);
   return (
     <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center p-4" onClick={onClose}>
       <div className="absolute inset-0" style={{ background: 'hsl(var(--bg) / 0.7)', backdropFilter: 'blur(10px)' }} />
-      <div className="relative liquid-glass rounded-3xl p-6 md:p-8 max-w-lg w-full max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+      <div className="relative liquid-glass rounded-3xl p-6 md:p-8 max-w-lg w-full max-h-[85vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-start justify-between gap-4 mb-6">
           <div>
-            <div className="text-[10px] tracking-[0.24em] uppercase opacity-60">Jump to</div>
-            <div className="font-display text-3xl md:text-4xl mt-1">A <em style={{ color: 'hsl(var(--accent))', fontStyle: 'italic' }}>day.</em></div>
+            <div className="text-[10px] tracking-[0.24em] uppercase opacity-60">{data.label}</div>
+            <div className="font-display text-3xl md:text-4xl mt-1">Plan & <em style={{ color: 'hsl(var(--accent))', fontStyle: 'italic' }}>spend.</em></div>
           </div>
           <button onClick={onClose} className="liquid-glass rounded-full w-9 h-9 flex items-center justify-center shrink-0" aria-label="Close">
             <Icon.Close className="w-4 h-4" />
           </button>
         </div>
 
-        <div className="space-y-7">
-          {sections.map((s) =>
-          <div key={s.key}>
-              <div className="flex items-baseline justify-between mb-3">
-                <div className={`font-display text-xl ${dest === s.key ? '' : 'opacity-60'}`}>{s.label}</div>
-                <div className="text-[10px] tracking-[0.18em] uppercase opacity-50">{s.range}</div>
-              </div>
-              <ul className="flex flex-col gap-1.5">
-                {s.days.map((d) =>
-                <li key={d.n}>
-                    <button
-                    onClick={() => goToDay(s.key, d.n)}
-                    className="group w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-2xl transition-colors duration-200"
-                    style={{ background: 'transparent' }}
-                    onMouseEnter={(e) => e.currentTarget.style.background = 'hsl(var(--fg) / 0.06)'}
-                    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>
-                      <div className="font-display text-2xl leading-none w-12 shrink-0" style={{ color: 'hsl(var(--accent))' }}>
-                        <em style={{ fontStyle: 'italic' }}>{String(d.n).padStart(2, '0')}</em>
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="text-[10px] tracking-[0.16em] uppercase opacity-55">{d.date}</div>
-                        <div className="text-sm md:text-base mt-0.5 truncate">{d.title}</div>
-                      </div>
-                      <Icon.ArrowRight className="w-3.5 h-3.5 opacity-30 group-hover:opacity-90 group-hover:translate-x-1 transition-all duration-200 shrink-0" />
-                    </button>
-                  </li>
-                )}
-              </ul>
-            </div>
-          )}
+        {/* Currency converter — mobile only; desktop uses the nav chip */}
+        <div className="md:hidden">
+          <div className="flex items-center justify-between mb-3">
+            <div className="text-[10px] tracking-[0.22em] uppercase opacity-60">Currency converter</div>
+            <button
+              type="button"
+              onClick={() => setConverterKey((k) => k + 1)}
+              aria-label="Reset converter"
+              className="flex items-center gap-1.5 text-[10px] tracking-[0.18em] uppercase opacity-70 hover:opacity-100 transition-opacity">
+              <Icon.RotateCcw className="w-3.5 h-3.5" /> Reset
+            </button>
+          </div>
+          <CurrencyConverter key={converterKey} dest={dest} size="comfortable" />
+          <div className="my-6 border-t" style={{ borderColor: 'hsl(var(--fg) / 0.12)' }} />
+        </div>
+
+        {/* Itinerary — active route only */}
+        <div>
+          <div className="flex items-baseline justify-between mb-3">
+            <div className="text-[10px] tracking-[0.22em] uppercase opacity-60">Itinerary</div>
+            <div className="text-[10px] tracking-[0.18em] uppercase opacity-50">{data.dateRange}</div>
+          </div>
+          <ul className="flex flex-col gap-1.5">
+            {data.days.map((d) =>
+              <li key={d.n}>
+                <button
+                  onClick={(e) => { e.currentTarget.blur(); goToDay(dest, d.n); }}
+                  className="day-link-btn group w-full text-left flex items-center gap-3 px-3 py-3 rounded-2xl">
+                  <div className="font-display text-sm leading-none w-14 shrink-0 tracking-tight" style={{ color: 'hsl(var(--accent))' }}>
+                    Day <em style={{ fontStyle: 'italic' }}>{String(d.n).padStart(2, '0')}</em>
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="text-base truncate">{d.title}</div>
+                  </div>
+                  <Icon.ArrowRight className="w-3.5 h-3.5 opacity-30 group-hover:opacity-90 group-hover:translate-x-1 transition-all duration-200 shrink-0" />
+                </button>
+              </li>
+            )}
+          </ul>
         </div>
       </div>
     </div>);
@@ -462,6 +708,7 @@ function SectionTitle({ eyebrow, wordIndex = 0, children }) {
 // DayCards
 // ============================================================================
 function DayCards({ data, dest }) {
+  const wx = useWeather();
   return (
     <section className="relative py-16 md:py-24 px-4 md:px-6 overflow-hidden" data-screen-label="03 Days">
       {/* Aurora ribbons backdrop — theme-aware (see CSS) */}
@@ -472,14 +719,14 @@ function DayCards({ data, dest }) {
       <div className="relative z-10 mx-auto max-w-4xl">
         <SectionTitle eyebrow="Day by day">The <em>plan.</em></SectionTitle>
         <div className="mt-10 md:mt-16 flex flex-col gap-6 md:gap-8">
-          {data.days.map((d) => <DayCard key={d.n} day={d} dest={dest} />)}
+          {data.days.map((d) => <DayCard key={d.n} day={d} dest={dest} wx={wx} />)}
         </div>
       </div>
     </section>);
 
 }
 
-function DayCard({ day, dest }) {
+function DayCard({ day, dest, wx }) {
   const [scrollRef, p] = useScrollLinked();
   const [seenRef, seen] = useReveal();
   const isMobile = typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches;
@@ -520,7 +767,9 @@ function DayCard({ day, dest }) {
           <span className="opacity-70">Day</span>{' '}
           <em style={{ color: 'hsl(var(--accent))', fontStyle: 'italic' }}>{String(day.n).padStart(2, '0')}</em>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap justify-end">
+          {dayStatus(dest, day.n) === 'today' && <TodayBadge />}
+          {wx && <WeatherPill data={wx.getFor(dest, day.n)} loading={wx.loading} outOfRange={wx.outOfRange} />}
           {day.switch ?
           <>
               <NightPill>{day.switch[0]}</NightPill>
@@ -621,12 +870,11 @@ function ImgThumb({ im }) {
         target="_blank"
         rel="noopener noreferrer"
         onClick={(e) => e.stopPropagation()}
-        className="absolute left-2 right-2 bottom-2 liquid-glass rounded-full px-3 py-1 text-[10px] text-center caption-link"
-        style={{ backdropFilter: 'blur(10px)', color: 'inherit', textDecoration: 'none' }}
+        className="absolute left-2 right-2 bottom-2 rounded-full px-3 py-1 text-[10px] text-center caption-link image-caption-chip"
         title={`Open ${im.caption} in Google Maps`}>
         {im.caption}
       </a> :
-      <figcaption className="absolute left-2 right-2 bottom-2 liquid-glass rounded-full px-3 py-1 text-[10px] text-center" style={{ backdropFilter: 'blur(10px)' }}>
+      <figcaption className="absolute left-2 right-2 bottom-2 rounded-full px-3 py-1 text-[10px] text-center image-caption-chip">
         {im.caption}
       </figcaption>
       }

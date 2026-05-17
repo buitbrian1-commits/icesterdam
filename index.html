@@ -179,6 +179,106 @@
       contain: layout style;
     }
 
+    /* Hamburger day-jump links — no JS hover (sticky on iOS), CSS-only hover
+       gated to real pointer devices, focus-visible-only accent ring. */
+    .day-link-btn {
+      background: transparent;
+      transition: background-color .2s ease;
+      outline: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    @media (hover: hover) {
+      .day-link-btn:hover { background: hsl(var(--fg) / 0.06); }
+    }
+    .day-link-btn:focus { outline: none; box-shadow: none; }
+    .day-link-btn:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 2px hsl(var(--accent) / 0.5), 0 0 0 4px hsl(var(--bg));
+    }
+
+    /* Currency chip — subtle hover lift matching nav interactive elements */
+    .fx-chip { transition: transform .2s var(--ease-soft), background .2s ease; cursor: pointer; }
+    .fx-chip:hover { transform: translateY(-1px); }
+
+    /* Currency converter — base theme-aware styling for the semantic classes */
+    .fx-header   { color: hsl(var(--fg) / 0.6); }
+    .fx-label    { color: hsl(var(--fg) / 0.7); }
+    .fx-footnote { color: hsl(var(--fg) / 0.55); }
+    .fx-reset    { color: hsl(var(--fg) / 0.7); }
+    .fx-reset:hover { color: hsl(var(--fg)); }
+
+    .wx-input {
+      color: hsl(var(--fg));
+      background: transparent;
+      border-color: hsl(var(--fg) / 0.15);
+      transition: background-color .2s ease, border-color .15s ease, color .2s ease, box-shadow .15s ease;
+    }
+    .wx-input:focus {
+      border-color: hsl(var(--accent) / 0.6) !important;
+      box-shadow: 0 0 0 3px hsl(var(--accent) / 0.18);
+    }
+
+    /* Currency dropdown — entry animation + smooth transitions between
+       theme-aware (scrolled) and on-hero (transparent nav) variants. */
+    .fx-dropdown {
+      animation: fx-dropdown-in 200ms cubic-bezier(0.16, 1, 0.3, 1) both;
+      transform-origin: top right;
+      transition: background 200ms ease, background-color 200ms ease, border-color 200ms ease, color 200ms ease;
+    }
+    .fx-dropdown .fx-header,
+    .fx-dropdown .fx-label,
+    .fx-dropdown .fx-footnote,
+    .fx-dropdown .fx-reset {
+      transition: color 200ms ease;
+    }
+    @keyframes fx-dropdown-in {
+      from { opacity: 0; transform: translateY(-8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* On-hero variant: fixed dark glass + light text regardless of theme.
+       Used when the nav is still transparent (hero in view) so the dropdown
+       doesn't blend into the warm Amsterdam canal-video backdrop. */
+    .fx-dropdown.fx-dropdown--hero {
+      background: rgba(15, 18, 24, 0.82);
+      backdrop-filter: blur(20px) saturate(140%);
+      -webkit-backdrop-filter: blur(20px) saturate(140%);
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      color: rgba(255, 255, 255, 0.95);
+    }
+    .fx-dropdown.fx-dropdown--hero::before { display: none; }
+    .fx-dropdown.fx-dropdown--hero .fx-header   { color: rgba(255, 255, 255, 0.6); }
+    .fx-dropdown.fx-dropdown--hero .fx-label    { color: rgba(255, 255, 255, 0.7); }
+    .fx-dropdown.fx-dropdown--hero .fx-footnote { color: rgba(255, 255, 255, 0.5); }
+    .fx-dropdown.fx-dropdown--hero .fx-reset    { color: rgba(255, 255, 255, 0.6); }
+    .fx-dropdown.fx-dropdown--hero .fx-reset:hover { color: rgba(255, 255, 255, 1); }
+    .fx-dropdown.fx-dropdown--hero .wx-input {
+      color: rgba(255, 255, 255, 1);
+      background: rgba(255, 255, 255, 0.06);
+      caret-color: white;
+    }
+    /* Focus ring stays theme-accent (handled by .wx-input:focus !important);
+       this rule only governs the unfocused border in hero variant. */
+    .fx-dropdown.fx-dropdown--hero .wx-input:not(:focus) {
+      border-color: rgba(255, 255, 255, 0.12);
+    }
+
+    /* Subtle shimmer used by the weather pill while its fetch is in flight. */
+    .wx-shimmer {
+      background-image: linear-gradient(
+        100deg,
+        hsl(var(--fg) / 0.04) 0%,
+        hsl(var(--fg) / 0.12) 45%,
+        hsl(var(--fg) / 0.04) 90%
+      );
+      background-size: 200% 100%;
+      animation: wx-shimmer 1.4s ease-in-out infinite;
+    }
+    @keyframes wx-shimmer {
+      0%   { background-position: 100% 0; }
+      100% { background-position: -100% 0; }
+    }
+
     .thumb { transition: transform .3s var(--ease-soft); }
     .thumb:hover { transform: translateY(-6px) rotate(1deg) scale(1.02); }
 
@@ -342,10 +442,24 @@
     .caption-link {
       transition: filter 200ms ease, transform 200ms ease;
       cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48"><text x="24" y="38" font-size="40" text-anchor="middle">%F0%9F%93%8D</text></svg>') 24 24, pointer;
+      text-decoration: none;
     }
     .caption-link:hover {
       filter: brightness(1.15);
       transform: scale(1.03);
+    }
+
+    /* Image-overlay caption chips on day cards. Fixed dark glass regardless
+       of theme so white text stays legible over warm/light Amsterdam photos
+       as well as the dark Iceland ones. Scope: image overlays ONLY — other
+       liquid-glass surfaces remain theme-aware. */
+    .image-caption-chip {
+      background: rgba(0, 0, 0, 0.55);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      backdrop-filter: blur(10px) saturate(120%);
+      -webkit-backdrop-filter: blur(10px) saturate(120%);
+      color: rgba(255, 255, 255, 0.95);
+      box-shadow: 0 4px 14px -6px rgba(0, 0, 0, 0.5);
     }
 
     /* Page-specific emoji cursor. Rendered via inline SVG data URLs because
