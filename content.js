@@ -64,8 +64,8 @@ window.TRIP = {
         title: 'Land, soak, and stumble through Reykjavík',
         images: [
           src('./blue-lagoon.webp', 'Blue Lagoon', 'coast', gmap('Blue Lagoon Iceland')),
-          pick('hills', 'Hallgrímskirkja', gmap('Hallgrimskirkja Reykjavik')),
-          pick('generic', 'Harpa Concert Hall', gmap('Harpa Concert Hall')),
+          src('./hallgrim.jpg', 'Hallgrímskirkja', 'hills', gmap('Hallgrimskirkja Reykjavik')),
+          src('./rainbow-street.jpg', 'Rainbow Street', 'generic', gmap('Rainbow Street Reykjavik')),
         ],
         timeline: [
           ['2:30 pm', 'Land at KEF', null],
@@ -84,11 +84,9 @@ window.TRIP = {
         switch: null,
         title: 'Golden Circle & tomato-soup lunch',
         images: [
-          src('https://images.unsplash.com/photo-1445127040028-b1bdb9acd16e?w=800&q=80&auto=format&fit=crop&crop=entropy', 'Þingvellir', 'mossy', gmap('Thingvellir National Park')),
-          // TODO Strokkur — awaiting verified Unsplash URL; stand-in keeps Iceland scenery
-          pick('waterfall', 'Strokkur Geyser', gmap('Strokkur Geyser Iceland')),
-          // TODO Gullfoss — awaiting verified Unsplash URL; stand-in keeps Iceland scenery
-          pick('waterfall', 'Gullfoss', gmap('Gullfoss waterfall Iceland')),
+          src('./thingvellir-national-park-rift-valley.jpg', 'Þingvellir', 'mossy', gmap('Thingvellir National Park')),
+          src('./Fridheimar.webp', 'Friðheimar', 'mossy', gmap('Friðheimar Tomato Farm')),
+          src('./gullfoss.jpeg', 'Gullfoss', 'waterfall', gmap('Gullfoss waterfall Iceland')),
         ],
         timeline: [
           ['8:30 am', 'Depart Reykjavík', null],
@@ -109,10 +107,9 @@ window.TRIP = {
         switch: ['Reykjavík', 'Selfoss'],
         title: 'South Coast Pt. 1 — the waterfall day',
         images: [
-          src('https://images.unsplash.com/photo-1596920332775-cadd09e3a035?w=800&q=80&auto=format&fit=crop&crop=top', 'Seljalandsfoss', 'waterfall', gmap('Seljalandsfoss')),
-          src('https://images.unsplash.com/photo-1508131482539-2b57b21ca1ec?w=800&q=80&auto=format&fit=crop&crop=top', 'Skógafoss', 'waterfall', gmap('Skogafoss')),
-          // TODO Kvernufoss — awaiting verified Unsplash URL; stand-in keeps Iceland scenery
-          pick('mossy', 'Kvernufoss', gmap('Kvernufoss')),
+          src('./Seljalandsfoss.jpg', 'Seljalandsfoss', 'waterfall', gmap('Seljalandsfoss')),
+          src('./Gljufrabui.png', 'Gljúfrabúi', 'mossy', gmap('Gljúfrabúi')),
+          src('./airbnb.avif', 'Airbnb in Ölfus', 'mossy', 'https://maps.app.goo.gl/8wqRiih68BijD4YBA'),
         ],
         timeline: [
           ['8:00 am', 'Check out, head south on Route 1', null],
@@ -133,11 +130,9 @@ window.TRIP = {
         switch: null,
         title: 'South Coast Pt. 2 — Vík & black sand',
         images: [
-          src('https://images.unsplash.com/photo-1751989802391-c3f8d586d851?w=800&q=80&auto=format&fit=crop&crop=entropy', 'Reynisfjara', 'coast', gmap('Reynisfjara Beach')),
-          // TODO Dyrhólaey arch — awaiting verified Unsplash URL; stand-in keeps Iceland scenery
-          pick('coast', 'Dyrhólaey', gmap('Dyrholaey Iceland')),
-          // TODO Vík í Mýrdal red-roof church — awaiting verified Unsplash URL
-          pick('hills', 'Vík í Mýrdal', gmap('Vik i Myrdal')),
+          src('./Dyrholaey.avif', 'Dyrhólaey', 'coast', gmap('Dyrholaey Iceland')),
+          src('./black-sand.webp', 'Reynisfjara', 'coast', gmap('Reynisfjara Beach')),
+          src('./vik.avif', 'Vík í Mýrdal', 'hills', gmap('Vik i Myrdal')),
         ],
         timeline: [
           ['9:00 am', 'Depart after breakfast', null],
@@ -158,10 +153,8 @@ window.TRIP = {
         switch: ['Selfoss', 'Reykjavík'],
         title: 'Reykjanes, golf at Brautarholt & a final dinner',
         images: [
-          // TODO Seltún steaming geothermal field — stand-in keeps Iceland scenery
-          pick('mossy', 'Seltún', gmap('Seltun Geothermal Area')),
-          // TODO Reykjanes Lighthouse — stand-in keeps Iceland scenery
-          pick('coast', 'Reykjanes Lighthouse', gmap('Reykjanesviti Lighthouse')),
+          src('./seltun.webp', 'Seltún', 'mossy', gmap('Seltun Geothermal Area')),
+          src('./reykjanes-lighthouse.webp', 'Reykjanes Lighthouse', 'coast', gmap('Reykjanesviti Lighthouse')),
           // Brautarholt — hosted on icelandreview.com per spec, NOT Unsplash-sized
           src('https://www.icelandreview.com/wp-content/uploads/2026/03/nature-golfing-iceland-1024x640.jpg', 'Brautarholt', 'hills', gmap('Brautarholt Golf Club', 'ChIJRfMfZmnf1UgRClvuJPtahbs')),
         ],
@@ -202,12 +195,9 @@ window.TRIP = {
         switch: null,
         title: 'Arrival, Jordaan walk & Supper',
         images: [
-          { src: picsum('ams-d1-jordaan'), caption: 'Jordaan canal', mapUrl: gmap('Jordaan Amsterdam') },
-          // Studio 54 by Supper — theatrical red-lit dinner-show. Hero photo
-          // from supper.amsterdam not directly embeddable; using a moody
-          // candlelit/warm-glow restaurant stand-in until a better URL is supplied.
-          { src: 'https://images.unsplash.com/photo-1551024601-bec78aea704b?w=800&q=80&auto=format&fit=crop&crop=entropy', caption: 'Studio 54 by Supper', mapUrl: gmap('Supper Restaurant Amsterdam', 'ChIJkTRcMsEJxkcRy92RPMUFxnU') },
-          { src: picsum('ams-d1-ninestreets'), caption: 'Nine Streets', mapUrl: gmap('Nine Streets Amsterdam') },
+          { src: './hotel-mercier.png', caption: 'Hotel Mercier', mapUrl: gmap('Hotel Mercier Amsterdam') },
+          { src: './jordan.jpg', caption: 'Canal Belt', mapUrl: gmap('Canal Belt Amsterdam') },
+          { src: './studio54.webp', caption: 'Studio 54 by Supper', mapUrl: gmap('Supper Restaurant Amsterdam', 'ChIJkTRcMsEJxkcRy92RPMUFxnU') },
         ],
         timeline: [
           ['4:00 pm', 'Land Amsterdam, head to hotel', null],
@@ -226,9 +216,9 @@ window.TRIP = {
         switch: null,
         title: 'De Pijp, canal cruise & speakeasy',
         images: [
-          { src: 'https://images.unsplash.com/photo-1488459716781-31db52582fe9?w=800&q=80&auto=format&fit=crop&crop=entropy', caption: 'Albert Cuypmarkt', mapUrl: gmap('Albert Cuypmarkt Amsterdam') },
-          { src: 'https://images.unsplash.com/photo-1512470876302-972faa2aa9a4?w=800&q=80&auto=format&fit=crop&crop=entropy', caption: 'Canal Cruise', mapUrl: gmap('Those Dam Boat Guys', 'ChIJac5EOsUJxkcRMkZbI82BsP8') },
-          { src: 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=800&q=80&auto=format&fit=crop&crop=entropy', caption: 'Door 74', mapUrl: gmap('Door 74', 'ChIJswl2sOoJxkcR8VOtTz4vkB0') },
+          { src: './AlbertCuypmarkt.webp', caption: 'Albert Cuypmarkt', mapUrl: gmap('Albert Cuypmarkt Amsterdam') },
+          { src: './canal-those-dam-boat-guys.jpg', caption: 'Canal Cruise', mapUrl: gmap('Those Dam Boat Guys', 'ChIJac5EOsUJxkcRMkZbI82BsP8') },
+          { src: './door-74.webp', caption: 'Door 74', mapUrl: gmap('Door 74', 'ChIJswl2sOoJxkcR8VOtTz4vkB0') },
         ],
         timeline: [
           ['Slow morning', 'Coffee + pastries in Jordaan / Nine Streets', null],
@@ -249,9 +239,8 @@ window.TRIP = {
         switch: null,
         title: 'Best of Amsterdam — our way',
         images: [
-          // TODO Vondelpark — awaiting verified Unsplash URL
-          { src: picsum('ams-d3-vondelpark'), caption: 'Vondelpark', mapUrl: gmap('Vondelpark Amsterdam') },
-          { src: 'https://images.unsplash.com/photo-1559511260-66a654ae982a?w=800&q=80&auto=format&fit=crop&crop=entropy', caption: 'CIMA', mapUrl: gmap('CIMA Rooftop Bar Amsterdam') },
+          { src: './coffee.jpg', caption: 'Coffee in Jordaan', mapUrl: gmap('Jordaan Amsterdam') },
+          { src: './Vondelpark.jpg', caption: 'Vondelpark', mapUrl: gmap('Vondelpark Amsterdam') },
           // Canal Dinner — no specific restaurant yet, caption stays non-clickable
           { src: 'https://images.unsplash.com/photo-1459679749680-18eb1eb37418?w=800&q=80&auto=format&fit=crop&crop=entropy', caption: 'Canal Dinner' },
         ],
