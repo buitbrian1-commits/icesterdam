@@ -179,6 +179,15 @@
       contain: layout style;
     }
 
+    /* Hamburger sheet — fade the bottom so partially-clipped scroll content
+       softens out instead of being sliced by the panel's inner-border line.
+       The fade sits inside the bottom padding when content fits, and over
+       the last visible row when scrolling on shorter viewports. */
+    .menu-sheet {
+      -webkit-mask-image: linear-gradient(to bottom, black calc(100% - 32px), transparent 100%);
+              mask-image: linear-gradient(to bottom, black calc(100% - 32px), transparent 100%);
+    }
+
     /* Hamburger day-jump links — no JS hover (sticky on iOS), CSS-only hover
        gated to real pointer devices, focus-visible-only accent ring. */
     .day-link-btn {

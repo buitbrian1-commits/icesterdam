@@ -331,7 +331,7 @@ function DayNavigatorSheet({ dest, onClose, goToDay }) {
   return (
     <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center p-4" onClick={onClose}>
       <div className="absolute inset-0" style={{ background: 'hsl(var(--bg) / 0.7)', backdropFilter: 'blur(10px)' }} />
-      <div className="relative liquid-glass rounded-3xl p-6 md:p-8 max-w-lg w-full max-h-[85vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+      <div className="relative liquid-glass rounded-3xl p-6 md:p-8 max-w-lg w-full max-h-[92vh] overflow-y-auto overscroll-contain menu-sheet" onClick={(e) => e.stopPropagation()} style={{ paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }}>
         <div className="flex items-start justify-between gap-4 mb-6">
           <div>
             <div className="text-[10px] tracking-[0.24em] uppercase opacity-60">{data.label}</div>
